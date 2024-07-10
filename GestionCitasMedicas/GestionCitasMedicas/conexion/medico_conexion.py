@@ -20,18 +20,19 @@ def select_by_especialidad(especialidad: str):
         resultado = session.exec(consulta)
         return resultado.all()
 
-# Crear un médico
+#Crear un medico
 def crear_medico(medico: Medico):
     engine = connect()
     try:
         with Session(engine) as session:
+            print(medico)
             session.add(medico)
             session.commit()
-            print(medico)
+            print("Guarda los datos",medico.especialidad)
             if medico.id is not None:
                 consulta = select(Medico).where(Medico.id == medico.id)
                 resultado = session.exec(consulta)
-                return resultado.all()
+                return resultado.one_or_none()
             else:
                 return None
     except SQLAlchemyError as e:
@@ -68,3 +69,10 @@ def actualizar_medico(medico: Medico):
                 return False
     except SQLAlchemyError as e:
         print(e)
+
+def select_by_id(id: int):
+    engine = connect()
+    with Session(engine) as session:
+        consulta = select(Medico).where(Medico.id == id)
+        resultado = session.exec(consulta)
+        return resultado.one_or_none()

@@ -6,9 +6,11 @@ class MedicoState(rx.State):
     medicos: list[Medico]
     buscar_especialidad: str = ""
 
-    rx.background
-    def get_todos_medicos(self):
-        self.medicos = servicio_medicos_all()
+    @rx.background
+    async def get_todos_medicos(self):
+        async with self:
+            self.medicos = servicio_medicos_all()
+            print(self.medicos)
 
     rx.background
     def get_medico_especialidad(self):
@@ -18,14 +20,17 @@ class MedicoState(rx.State):
         self.buscar_especialidad = value
 
     # Crear el método para guardar un registro en la BD
-    rx.background
-    def crear_medico(self, data: dict):
-        try:
-            self.medicos = servicio_crear_medico(
-                data['usuario_id'], data['especialidad']
-            )
-        except Exception as e:
-            print(e)
+    @rx.background
+    async def crear_medico(self, data: dict):
+        async with self:
+            try:
+                print(data)
+                self.medicos = servicio_crear_medico(
+                    data['usuario_id'], data['especialidad']
+                )
+                self.medicos = servicio_medicos_all()
+            except Exception as e:
+                print(e)
 
 # Página que muestra el listado de médicos
 @rx.page(route="/medicos", title="Lista de Médicos", on_load=MedicoState.get_todos_medicos)
@@ -49,7 +54,7 @@ def tabla_medicos(lista_medicos: list[Medico]) -> rx.Component:
     return rx.table.root(
         rx.table.header(
             rx.table.row(
-                rx.table.column_header_cell("ID"),
+                #rx.table.column_header_cell("ID"),
                 rx.table.column_header_cell("Usuario ID"),
                 rx.table.column_header_cell("Especialidad"),
                 rx.table.column_header_cell("Acciones"),

@@ -27,6 +27,7 @@ def crear_paciente(paciente: Paciente):
         with Session(engine) as session:
             session.add(paciente)
             session.commit()
+            print(paciente)
             session.refresh(paciente)
             return paciente
     except SQLAlchemyError as e:
